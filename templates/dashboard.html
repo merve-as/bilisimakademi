@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block title %}Genel Bakış & İstatistikler{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    
+    <!-- 1. BÖLÜM: KARŞILAMA VE SAYFA BAŞLIĞI -->
+    <div class="page-header d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Genel Bakış</h2>
+            <p class="text-muted mb-0">Akademi yönetim paneline hoş geldiniz. Anlık veritabanı istatistikleri aşağıdadır.</p>
+        </div>
+        <div>
+            <a href="{{ url_for('students_page') }}" class="btn btn-primary shadow-sm">
+                <i class="fa-solid fa-plus me-1"></i> Yeni Öğrenci Ekle
+            </a>
+        </div>
+    </div>
+
+
+     <div class="row g-3 mb-4">
+        
+        <!-- Kart 1: Toplam Öğrenci -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="stat-card stat-primary">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-user-graduate"></i>
+                </div>
+                <div class="stat-details">
+                    <span class="stat-title">Toplam Öğrenci</span>
+                    <h3 class="stat-value">{{ stats.total_students }}</h3>
+                    <span class="stat-desc text-success"><i class="fa-solid fa-check-circle"></i> Sistemde Kayıtlı</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kart 2: Aktif Kurs Sayısı -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="stat-card stat-success">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-book-open-reader"></i>
+                </div>
+                <div class="stat-details">
+                    <span class="stat-title">Aktif Kurslar</span>
+                    <h3 class="stat-value">{{ stats.total_courses }}</h3>
+                    <span class="stat-desc text-primary"><i class="fa-solid fa-graduation-cap"></i> Farklı Branş</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kart 3: Genel Not Ortalaması -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="stat-card stat-warning">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-chart-line"></i>
+                </div>
+                <div class="stat-details">
+                    <span class="stat-title">Not Ortalaması</span>
+                    <h3 class="stat-value">{{ stats.avg_grade }}</h3>
+                    <span class="stat-desc text-muted">/ 100 Puan Üzerinden</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kart 4: Başarılı Öğrenci Sayısı -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="stat-card stat-info">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-award"></i>
+                </div>
+                <div class="stat-details">
+                    <span class="stat-title">Başarılı Öğrenci</span>
+                    <h3 class="stat-value">{{ stats.successful_students }}</h3>
+                    <span class="stat-desc text-success"><i class="fa-solid fa-arrow-trend-up"></i> 70 Puan ve Üzeri</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. BÖLÜM: GRAFİKLER VE GÖRSEL ANALİZ (CHART.JS) -->
+    <div class="row g-4 mb-4">
+        <!-- Grafik 1: Kurslara Göre Öğrenci Dağılımı -->
+        <div class="col-12 col-lg-7">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0"><i class="fa-solid fa-chart-column text-primary me-2"></i> Kurslara Göre Öğrenci Dağılımı</h5>
+                    <span class="badge bg-light text-dark">SQL GROUP BY Analizi</span>
+                </div>
+                <div class="card-body">
+                    <!-- Chart.js bu canvas elementinin içine grafik çizecektir: -->
+                    <div style="position: relative; height: 280px;">
+                        <canvas id="courseChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grafik 2: Veritabanı Bilgi Kartı -->
+        <div class="col-12 col-lg-5">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white py-3 border-0">
+                    <h5 class="fw-bold mb-0"><i class="fa-solid fa-server text-info me-2"></i> Veritabanı Mimarisi</h5>
+                </div>
+                <div class="card-body">
+                    <div class="tech-stack-list">
+                        <div class="tech-item d-flex align-items-center p-2 mb-2 rounded bg-light">
+                            <div class="tech-badge bg-primary text-white p-2 rounded me-3">
+                                <i class="fa-solid fa-database"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold">Aktif Veritabanı Motoru</h6>
+                                <small class="text-success fw-semibold">{{ stats.db_type }}</small>
+                            </div>
+                        </div>
+
+                        <div class="tech-item d-flex align-items-center p-2 mb-2 rounded bg-light">
+                            <div class="tech-badge bg-warning text-dark p-2 rounded me-3">
+                                <i class="fa-brands fa-python"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold">Python Web Backend</h6>
+                                <small class="text-muted">Flask 3.x & PyODBC Sürücüsü</small>
+                            </div>
+                        </div>
+
+                        <div class="tech-item d-flex align-items-center p-2 rounded bg-light">
+                            <div class="tech-badge bg-info text-white p-2 rounded me-3">
+                                <i class="fa-brands fa-js"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold">Dinamik Ön Yüz (Frontend)</h6>
+                                <small class="text-muted">HTML5, CSS3, Bootstrap 5 & Chart.js</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. BÖLÜM: SON EKLENEN ÖĞRENCİLER TABLOSU -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold mb-0"><i class="fa-solid fa-clock-rotate-left text-secondary me-2"></i> Son Eklenen Öğrenciler</h5>
+            <a href="{{ url_for('students_page') }}" class="btn btn-sm btn-outline-primary">Tümünü Gör ({{ stats.total_students }})</a>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Öğrenci Adı Soyadı</th>
+                        <th>E-Posta</th>
+                        <th>Kayıtlı Olduğu Kurs</th>
+                        <th>Not Ortalaması</th>
+                        <th>Durum</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Jinja2 Döngüsü: Python'dan gelen 'students' listesini tek tek satırlara döküyoruz -->
+                    {% for student in students %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-sm bg-primary-subtle text-primary rounded-circle me-2 fw-bold d-flex align-items-center justify-content-center" style="width:36px; height:36px;">
+                                    {{ student.Ad[0] }}{{ student.Soyad[0] }}
+                                </div>
+                                <span class="fw-semibold">{{ student.Ad }} {{ student.Soyad }}</span>
+                            </div>
+                        </td>
+                        <td><small class="text-muted">{{ student.Email }}</small></td>
+                        <td><span class="badge bg-secondary-subtle text-secondary">{{ student.KursAdi }}</span></td>
+                        <td>
+                            <span class="fw-bold {% if student.NotOrtalamasi >= 70 %}text-success{% else %}text-warning{% endif %}">
+                                {{ student.NotOrtalamasi }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if student.NotOrtalamasi >= 70 %}
+                                <span class="badge bg-success-subtle text-success"><i class="fa-solid fa-check me-1"></i>Başarılı</span>
+                            {% else %}
+                                <span class="badge bg-warning-subtle text-warning"><i class="fa-solid fa-circle-exclamation me-1"></i>Geliştirilmeli</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <!-- Eğer hiç öğrenci yoksa: -->
+                    <tr>
+                        <td colspan="5" class="text-center py-4 text-muted">
+                            <i class="fa-solid fa-folder-open d-block mb-2 fs-3"></i>
+                            Henüz veritabanında kayıtlı öğrenci bulunmuyor.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Dashboard sayfasına özel Chart.js başlatma komutu -->
+<script>
+    // Python tarafından gelen JSON verilerini JavaScript değişkenine aktarıyoruz:
+    const courseDistribution = {{ stats.course_distribution | tojson }};
+    
+    // app.js içindeki grafik çizim fonksiyonumuzu çağırıyoruz:
+    if (typeof initDashboardChart === 'function') {
+        initDashboardChart(courseDistribution);
+    }
+</script>
+{% endblock %}

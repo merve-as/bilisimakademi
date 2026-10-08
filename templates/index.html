@@ -1,0 +1,74 @@
+{% extends "front_base.html" %}
+
+{% block title %}Ana Sayfa - YazılımAkademi{% endblock %}
+
+{% block content %}
+
+ <section class="hero-section">
+        <div class="container px-4">
+            <h1 class="hero-title">Geleceğin Yazılımcısı Sen Ol!</h1>
+            <p class="hero-subtitle">
+                Python, Web Geliştirme, Veritabanı ve çok daha fazlasını uzman eğitmen kadromuzla uygulamalı olarak öğrenin.
+            </p>
+            <div class="d-flex justify-content-center gap-3 mt-4">
+                <a href="#kurslarimiz" class="btn btn-primary btn-lg rounded-pill px-5 shadow">Kursları İncele</a>
+            </div>
+        </div>
+    </section>
+
+
+     <section id="kurslarimiz" class="course-showcase-section">
+        <div class="container">
+            <div class="text-center mb-5">
+                <span class="text-primary fw-bold text-uppercase tracking-wider">EĞİTİM PROGRAMLARIMIZ</span>
+                <h2 class="fw-bold mt-2 text-dark">Size Uygun Kursu Seçin</h2>
+                <p class="text-muted">Güncel teknolojilerle hazırlanan müfredatımızı keşfedin.</p>
+            </div>
+
+            <div class="row g-4 justify-content-center">
+                {% for course in courses %}
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="showcase-card d-flex flex-column">
+                        
+                        <!-- Kurs Kategori İkonu (Kategoriye göre farklı ikon gösterebiliriz) -->
+                        <div class="course-icon">
+                            {% if 'Yazılım' in course.Kategori or 'Python' in course.Kategori %}
+                                <i class="fa-brands fa-python"></i>
+                            {% elif 'Web' in course.Kategori %}
+                                <i class="fa-brands fa-html5"></i>
+                            {% elif 'Veritabanı' in course.Kategori or 'SQL' in course.Kategori %}
+                                <i class="fa-solid fa-database"></i>
+                            {% else %}
+                                <i class="fa-solid fa-laptop-code"></i>
+                            {% endif %}
+                        </div>
+
+                        <!-- Kurs Bilgileri -->
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle align-self-start mb-3">{{ course.Kategori }}</span>
+                        <h3 class="course-title">{{ course.KursAdi }}</h3>
+                        
+                        <!-- Eğitmen Bilgisi -->
+                        <div class="mt-auto pt-4 d-flex align-items-center text-muted">
+                            <i class="fa-solid fa-chalkboard-user me-2 text-primary"></i>
+                            <span class="fw-semibold">{{ course.Egitmen }}</span>
+                        </div>
+                        
+                        <!-- Alt Kısım -->
+                        <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                            <span class="fw-bold text-dark"><i class="fa-solid fa-star text-warning me-1"></i> {{ course.Kredi }} Kredi</span>
+                            <button class="btn btn-sm btn-outline-primary rounded-pill px-3">Detaylar</button>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <!-- Veritabanında hiç kurs yoksa (Boş durum): -->
+                <div class="col-12 text-center text-muted py-5">
+                    <i class="fa-solid fa-ghost fs-1 d-block mb-3 opacity-50"></i>
+                    <h4>Şu an kayıtlı kurs bulunmamaktadır.</h4>
+                    <p>Yönetici panelinden yeni kurslar ekleyebilirsiniz.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+{% endblock %}

@@ -1,0 +1,123 @@
+<!-- ===================================================================
+     KURSLAR VE DERSLER SAYFASI (courses.html)
+=================================================================== -->
+
+{% extends "base.html" %}
+
+{% block title %}Kurslar ve Dersler{% endblock %}
+
+{% block content %}
+<div class="courses-container">
+    
+    <!-- 1. ÜST BAŞLIK -->
+    <div class="page-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Kurs & Ders Yönetimi</h2>
+            <p class="text-muted mb-0">Akademi bünyesinde açılan kursları görüntüleyebilir ve yeni kurs tanımlayabilirsiniz.</p>
+        </div>
+        <div>
+            <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#addCourseModal">
+                <i class="fa-solid fa-plus me-1"></i> Yeni Kurs Aç
+            </button>
+        </div>
+    </div>
+
+    <!-- 2. KURS KARTLARI LİSTESİ -->
+    <div class="row g-4 mb-4">
+        {% for course in courses %}
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card course-card border-0 shadow-sm h-100">
+                <div class="card-body p-4 d-flex flex-column justify-content-between">
+                    <div>
+                        <!-- Kategori Rozeti -->
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge bg-primary-subtle text-primary border">{{ course.Kategori }}</span>
+                            <span class="badge bg-light text-muted border"><i class="fa-solid fa-star text-warning me-1"></i>{{ course.Kredi }} Kredi</span>
+                        </div>
+                        
+                        <!-- Kurs Adı -->
+                        <h5 class="fw-bold text-dark mb-2">{{ course.KursAdi }}</h5>
+                        
+                        <!-- Eğitmen Bilgisi -->
+                        <div class="d-flex align-items-center text-muted mb-3">
+                            <i class="fa-solid fa-chalkboard-user text-primary me-2"></i>
+                            <small class="fw-semibold">{{ course.Egitmen }}</small>
+                        </div>
+                    </div>
+
+                    <!-- Alt Bilgi / İşlem -->
+                    <div class="pt-3 border-top d-flex justify-content-between align-items-center">
+                        <small class="text-muted"><i class="fa-solid fa-hashtag"></i> ID: {{ course.KursID }}</small>
+                        <a href="{{ url_for('students_page') }}?q={{ course.KursAdi }}" class="btn btn-sm btn-outline-primary">
+                            Öğrencileri Gör <i class="fa-solid fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12">
+            <div class="card border-0 shadow-sm p-5 text-center text-muted">
+                <i class="fa-solid fa-book-open fs-1 d-block mb-3 text-secondary opacity-50"></i>
+                <h5>Henüz Açılmış Kurs Yok</h5>
+                <p class="small mb-0">Yukarıdaki "Yeni Kurs Aç" butonuyla ilk kursunuzu tanımlayabilirsiniz.</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+<!-- ================================================================= -->
+<!-- MODAL: YENİ KURS EKLEME PENCERESİ -->
+<!-- ================================================================= -->
+<div class="modal fade" id="addCourseModal" tabindex="-1" aria-labelledby="addCourseModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            
+            <form action="{{ url_for('courses_page') }}" method="POST">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="addCourseModalLabel"><i class="fa-solid fa-book-bookmark me-2"></i>Yeni Kurs Oluştur</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
+                </div>
+                
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Kurs Adı <span class="text-danger">*</span></label>
+                            <input type="text" name="kurs_adi" class="form-control" placeholder="Örn: Python & MS SQL Eğitimi" required>
+                        </div>
+                        
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Eğitmen Adı <span class="text-danger">*</span></label>
+                            <input type="text" name="egitmen" class="form-control" placeholder="Örn: Ahmet Hoca" required>
+                        </div>
+
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label fw-semibold">Ders Kredisi</label>
+                            <input type="number" name="kredi" class="form-control" min="1" max="10" value="3">
+                        </div>
+
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label fw-semibold">Kategori</label>
+                            <select name="kategori" class="form-select">
+                                <option value="Yazılım">Yazılım</option>
+                                <option value="Veritabanı">Veritabanı</option>
+                                <option value="Tasarım & Web">Tasarım & Web</option>
+                                <option value="Veri Bilimi">Veri Bilimi</option>
+                                <option value="Siber Güvenlik">Siber Güvenlik</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-plus me-1"></i> Kursu Kaydet</button>
+                </div>
+            </form>
+            
+        </div>
+    </div>
+</div>
+{% endblock %}

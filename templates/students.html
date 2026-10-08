@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+
+{% block title %}Öğrenci Yönetimi{% endblock %}
+
+{% block content %}
+<div class="students-container">
+    
+    <!-- 1. ÜST BAŞLIK VE YENİ ÖĞRENCİ EKLEME BUTONU -->
+    <div class="page-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Öğrenci Yönetimi</h2>
+            <p class="text-muted mb-0">Veritabanındaki tüm öğrencileri listeleyebilir, arayabilir, ekleyebilir veya silebilirsiniz.</p>
+        </div>
+        
+        <!-- Modal Açma Butonu (Bootstrap data-bs-toggle özelliği ile çalışır) -->
+        <div>
+            <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#addStudentModal">
+                <i class="fa-solid fa-user-plus me-1"></i> Yeni Öğrenci Kaydı
+            </button>
+        </div>
+    </div>
+
+    <!-- 2. ARAMA VE FİLTRELEME ÇUBUĞU (HTML GET FORMU) -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-3">
+            <form action="{{ url_for('students_page') }}" method="GET" class="row g-2 align-items-center">
+                <div class="col-12 col-md-9">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0 text-muted"><i class="fa-solid fa-magnifying-glass"></i></span>
+                        <input type="text" name="q" class="form-control border-start-0" placeholder="İsim, soyisim veya e-posta ile arayın..." value="{{ search_query }}">
+                    </div>
+                </div>
+                <div class="col-12 col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-dark w-100"><i class="fa-solid fa-filter me-1"></i> Ara</button>
+                    {% if search_query %}
+                        <!-- Arama varsa temizleme butonu göster: -->
+                        <a href="{{ url_for('students_page') }}" class="btn btn-outline-secondary" title="Filtreyi Temizle"><i class="fa-solid fa-rotate-left"></i></a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 3. ÖĞRENCİ TABLOSU -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold mb-0"><i class="fa-solid fa-list-check text-primary me-2"></i> Kayıtlı Öğrenci Listesi</h5>
+            <span class="badge bg-primary-subtle text-primary fw-semibold">{{ students|length }} Kayıt Bulundu</span>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 70px;">#ID</th>
+                        <th>Öğrenci Adı Soyadı</th>
+                        <th>İletişim Bilgileri</th>
+                        <th>Kayıtlı Kurs</th>
+                        <th>Not Ortalaması</th>
+                        <th class="text-end" style="width: 150px;">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Öğrenci Listeleme Döngüsü: -->
+                    {% for s in students %}
+                    <tr>
+                        <td><span class="text-muted fw-semibold">#{{ s.OgrenciID }}</span></td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-sm bg-primary text-white rounded-circle me-2 fw-bold d-flex align-items-center justify-content-center" style="width:38px; height:38px;">
+                                    {{ s.Ad[0] }}{{ s.Soyad[0] }}
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark">{{ s.Ad }} {{ s.Soyad }}</div>
+                                    <small class="badge bg-light text-muted border">{{ s.Kategori }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div><i class="fa-regular fa-envelope text-muted me-1"></i> <small>{{ s.Email }}</small></div>
+                            <div><i class="fa-solid fa-phone text-muted me-1"></i> <small class="text-muted">{{ s.Telefon }}</small></div>
+                        </td>
+                        <td>
+                            <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle">
+                                <i class="fa-solid fa-graduation-cap me-1"></i> {{ s.KursAdi }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="fw-bold fs-6 {% if s.NotOrtalamasi >= 70 %}text-success{% elif s.NotOrtalamasi >= 50 %}text-warning{% else %}text-danger{% endif %}">
+                                {{ s.NotOrtalamasi }}
+                            </span>
+                        </td>
+                        <!-- İşlem Butonları (Düzenle & Sil) -->
+                        <td class="text-end">
+                            <!-- Düzenle Butonu: JS ile verileri modal içine aktarır -->
+                            <button type="button" class="btn btn-sm btn-outline-primary btn-edit" data-id="{{ s.OgrenciID }}" title="Düzenle">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            
+                            <!-- Silme Butonu: SweetAlert2 onayı ile tetiklenir -->
+                            <button type="button" class="btn btn-sm btn-outline-danger btn-delete" data-id="{{ s.OgrenciID }}" data-name="{{ s.Ad }} {{ s.Soyad }}" title="Sil">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <!-- Tablo boşsa: -->
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted">
+                            <i class="fa-solid fa-user-slash fs-1 d-block mb-3 text-secondary opacity-50"></i>
+                            <h6 class="fw-bold">Hiç Öğrenci Bulunamadı</h6>
+                            <p class="small mb-0">Aradığınız kriterde öğrenci yok veya henüz veritabanına kayıt eklenmedi.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+
+
+
+<!-- ================================================================= -->
+<!-- MODAL 1: YENİ ÖĞRENCİ EKLEME PENCERESİ (ADD MODAL) -->
+ <!-- ================================================================= -->
+<div class="modal fade" id="addStudentModal" tabindex="-1" aria-labelledby="addStudentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            
+            <form action="{{ url_for('add_student') }}" method="POST">
+                <!-- Modal Başlığı -->
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="addStudentModalLabel"><i class="fa-solid fa-user-plus me-2"></i>Yeni Öğrenci Ekle</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
+                </div>
+                
+                <!-- Modal Form Gövdesi -->
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        
+                        <!-- İsim Alanı -->
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label fw-semibold">Öğrenci Adı <span class="text-danger">*</span></label>
+                            <input type="text" name="ad" class="form-control" placeholder="Örn: Ahmet" required>
+                        </div>
+                        
+                        <!-- Soyisim Alanı -->
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label fw-semibold">Soyadı <span class="text-danger">*</span></label>
+                            <input type="text" name="soyad" class="form-control" placeholder="Örn: Yılmaz" required>
+                        </div>
+                        
+                        <!-- E-Posta Alanı -->
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">E-Posta Adresi <span class="text-danger">*</span></label>
+                            <input type="email" name="email" class="form-control" placeholder="ornek@ogrenci.com" required>
+                        </div>
+
+                        <!-- Telefon Numarası -->
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label fw-semibold">Telefon Numarası</label>
+                            <input type="text" name="telefon" class="form-control" placeholder="0555 123 4567">
+                        </div>
+
+                        <!-- Not Ortalaması -->
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label fw-semibold">Not Ortalaması (0-100)</label>
+                            <input type="number" step="0.01" min="0" max="100" name="not_ortalamasi" class="form-control" placeholder="85.50" value="0.00">
+                        </div>
+
+                        <!-- Kurs Seçimi (Veritabanındaki Kurslar Tablosundan Dinamik Gelir) -->
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Dahil Edileceği Kurs</label>
+                            <select name="kurs_id" class="form-select">
+                                <option value="">-- Bir Kurs Seçin (Opsiyonel) --</option>
+                                {% for c in courses %}
+                                    <option value="{{ c.KursID }}">{{ c.KursAdi }} ({{ c.Egitmen }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Modal Alt Butonları -->
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk me-1"></i> Veritabanına Kaydet</button>
+                </div>
+            </form>
+            
+        </div>
+    </div>
+</div>
+
+
+
+
+<!-- ================================================================= -->
+<!-- MODAL 2: ÖĞRENCİ BİLGİLERİNİ GÜNCELLEME PENCERESİ (EDIT MODAL) -->
+<!-- ================================================================= -->
+<div class="modal fade" id="editStudentModal" tabindex="-1" aria-labelledby="editStudentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            
+            <form id="editStudentForm" method="POST">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title" id="editStudentModalLabel"><i class="fa-solid fa-user-pen me-2"></i>Öğrenci Bilgilerini Güncelle</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
+                </div>
+                
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label fw-semibold">Öğrenci Adı</label>
+                            <input type="text" id="edit_ad" name="ad" class="form-control" required>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label fw-semibold">Soyadı</label>
+                            <input type="text" id="edit_soyad" name="soyad" class="form-control" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">E-Posta</label>
+                            <input type="email" id="edit_email" name="email" class="form-control" required>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label fw-semibold">Telefon</label>
+                            <input type="text" id="edit_telefon" name="telefon" class="form-control">
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label fw-semibold">Not Ortalaması</label>
+                            <input type="number" step="0.01" min="0" max="100" id="edit_not_ortalamasi" name="not_ortalamasi" class="form-control">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Kayıtlı Kurs</label>
+                            <select id="edit_kurs_id" name="kurs_id" class="form-select">
+                                <option value="">-- Kurs Atanmadı --</option>
+                                {% for c in courses %}
+                                    <option value="{{ c.KursID }}">{{ c.KursAdi }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Vazgeç</button>
+                    <button type="submit" class="btn btn-success"><i class="fa-solid fa-check me-1"></i> Değişiklikleri Güncelle</button>
+                </div>
+            </form>
+            
+        </div>
+    </div>
+</div>
+
+<!-- Gizli Silme Formu (JavaScript ile tetiklenecek) -->
+<form id="deleteStudentForm" method="POST" style="display:none;"></form>
+
+{% endblock %}
